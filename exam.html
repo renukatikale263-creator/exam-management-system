@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Exam Timetable Portal</title>
+  <style>
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f4f7f6;
+      color: #333;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Header & Navigation */
+    header {
+      background-color: #2c3e50;
+      color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+    }
+
+    .btn-logout {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-logout:hover {
+      background-color: #c0392b;
+    }
+
+    /* Card & Container Layouts */
+    .card {
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      margin-bottom: 15px;
+      color: #2c3e50;
+      border-bottom: 2px solid #ecf0f1;
+      padding-bottom: 8px;
+    }
+
+    /* Tabs for Auth */
+    .tab-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: #e2e8f0;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 4px;
+      color: #4a5568;
+    }
+
+    .tab-btn.active {
+      background: #3182ce;
+      color: white;
+    }
+
+    /* Forms & Inputs */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background-color: #27ae60;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-primary:hover {
+      background-color: #219150;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    table th {
+      background-color: #f8f9fa;
+      color: #2c3e50;
+    }
+
+    table tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .empty-msg {
+      color: #7f8c8d;
+      font-style: italic;
+      padding: 15px 0;
+    }
+
+    /* Hidden Utility Class */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1>College Exam Timetable Portal</h1>
+      <div id="user-info" class="hidden">
+        <span id="welcome-text" style="margin-right: 15px;"></span>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <!-- SECTION 1: AUTHENTICATION (Register & Login) -->
+    <div id="auth-section">
+      <div class="card" style="max-width: 500px; margin: 0 auto;">
+        <div class="tab-group">
+          <button class="tab-btn active" onclick="switchAuthTab('login')">Login</button>
+          <button class="tab-btn" onclick="switchAuthTab('register')">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <h2>Login</h2>
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" required placeholder="Enter email">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" required placeholder="Enter password">
+          </div>
+          <button type="submit" class="btn-primary">Login</button>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+          <h2>Register</h2>
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" required placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" required placeholder="john@college.edu">
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" required placeholder="Set a password">
+          </div>
+          <div class="form-group">
+            <label for="reg-role">Role</label>
+            <select id="reg-role" onchange="toggleStudentFields()" required>
+              <option value="student">Student</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <!-- Student-specific Fields -->
+          <div id="student-fields" class="form-row">
+            <div class="form-group">
+              <label for="reg-year">Year</label>
+              <select id="reg-year">
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="reg-section">Section</label>
+              <select id="reg-section">
+                <option value="A">Section A</option>
+                <option value="B">Section B</option>
+                <option value="C">Section C</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary">Register Account</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- SECTION 2: ADMIN DASHBOARD -->
+    <div id="admin-dashboard" class="hidden">
+      <!-- Form to Add Exam -->
+      <div class="card">
+        <h2>Add New Exam</h2>
+        <form onsubmit="handleAddExam(event)">
+          <div class="form-group">
+            <label for="exam-subject">Subject Name</label>
+            <input type="text" id="exam-subject" required placeholder="e.g., Mathematics - II">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="exam-year">Target Year</label>
+              <select id="exam-year" required>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="exam-section">Target Section</label>
+              <select id="exam-section" required>
+                <option value="A">Section A</option>
+                <option value="B">Section B</option>
+                <option value="C">Section C</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="exam-date">Exam Date</label>
+              <input type="date" id="exam-date" required>
+            </div>
+            <div class="form-group">
+              <label for="exam-time">Exam Time</label>
+              <input type="time" id="exam-time" required>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary">Publish Exam Timetable</button>
+        </form>
+      </div>
+
+      <!-- All Created Exams List -->
+      <div class="card">
+        <h2>All Scheduled Exams</h2>
+        <table id="admin-exam-table">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Year</th>
+              <th>Section</th>
+              <th>Date</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="admin-exam-list">
+            <!-- Dynamic Exam Rows -->
+          </tbody>
+        </table>
+        <p id="admin-empty-msg" class="empty-msg hidden">No exams scheduled yet.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 3: STUDENT DASHBOARD -->
+    <div id="student-dashboard" class="hidden">
+      <div class="card">
+        <h2>My Class Exam Timetable</h2>
+        <p id="student-class-info" style="margin-bottom: 15px; font-weight: 500; color: #4a5568;"></p>
+        <table>
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Date</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="student-exam-list">
+            <!-- Dynamic Exam Rows Filtered by Student Class -->
+          </tbody>
+        </table>
+        <p id="student-empty-msg" class="empty-msg hidden">No exams found for your year and section.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // App State stored in browser LocalStorage
+    let users = JSON.parse(localStorage.getItem('portal_users')) || [];
+    let exams = JSON.parse(localStorage.getItem('portal_exams')) || [
+      // Sample Data
+      { id: 1, subject: 'Computer Networks', year: '3rd Year', section: 'A', date: '2026-10-12', time: '10:00' },
+      { id: 2, subject: 'Data Structures', year: '2nd Year', section: 'B', date: '2026-10-14', time: '14:00' }
+    ];
+    let currentUser = JSON.parse(localStorage.getItem('portal_current_user')) || null;
+
+    // Save Data Helpers
+    function saveUsers() { localStorage.setItem('portal_users', JSON.stringify(users)); }
+    function saveExams() { localStorage.setItem('portal_exams', JSON.stringify(exams)); }
+    function saveCurrentUser() { localStorage.setItem('portal_current_user', JSON.stringify(currentUser)); }
+
+    // Navigation / Auth Tab Switcher
+    function switchAuthTab(tab) {
+      const loginForm = document.getElementById('login-form');
+      const regForm = document.getElementById('register-form');
+      const tabs = document.querySelectorAll('.tab-btn');
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+        tabs[0].classList.add('active');
+        tabs[1].classList.remove('active');
+      } else {
+        loginForm.classList.add('hidden');
+        regForm.classList.remove('hidden');
+        tabs[0].classList.remove('active');
+        tabs[1].classList.add('active');
+      }
+    }
+
+    function toggleStudentFields() {
+      const role = document.getElementById('reg-role').value;
+      const studentFields = document.getElementById('student-fields');
+      if (role === 'student') {
+        studentFields.classList.remove('hidden');
+      } else {
+        studentFields.classList.add('hidden');
+      }
+    }
+
+    // Register User
+    function handleRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const role = document.getElementById('reg-role').value;
+
+      if (users.find(u => u.email === email)) {
+        alert('User with this email already exists!');
+        return;
+      }
+
+      const newUser = {
+        name,
+        email,
+        password,
+        role,
+        year: role === 'student' ? document.getElementById('reg-year').value : null,
+        section: role === 'student' ? document.getElementById('reg-section').value : null
+      };
+
+      users.push(newUser);
+      saveUsers();
+      alert('Registration successful! Please login.');
+      document.getElementById('register-form').reset();
+      switchAuthTab('login');
+    }
+
+    // Login User
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      const user = users.find(u => u.email === email && u.password === password);
+
+      if (!user) {
+        alert('Invalid email or password!');
+        return;
+      }
+
+      currentUser = user;
+      saveCurrentUser();
+      document.getElementById('login-form').reset();
+      renderApp();
+    }
+
+    // Logout
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('portal_current_user');
+      renderApp();
+    }
+
+    // Add Exam (Admin)
+    function handleAddExam(e) {
+      e.preventDefault();
+      const subject = document.getElementById('exam-subject').value.trim();
+      const year = document.getElementById('exam-year').value;
+      const section = document.getElementById('exam-section').value;
+      const date = document.getElementById('exam-date').value;
+      const time = document.getElementById('exam-time').value;
+
+      const newExam = { id: Date.now(), subject, year, section, date, time };
+      exams.push(newExam);
+      saveExams();
+
+      e.target.reset();
+      renderAdminDashboard();
+      alert('Exam scheduled successfully!');
+    }
+
+    // Render Admin Views
+    function renderAdminDashboard() {
+      const tbody = document.getElementById('admin-exam-list');
+      const emptyMsg = document.getElementById('admin-empty-msg');
+      tbody.innerHTML = '';
+
+      if (exams.length === 0) {
+        emptyMsg.classList.remove('hidden');
+      } else {
+        emptyMsg.classList.add('hidden');
+        exams.forEach(exam => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><strong>${exam.subject}</strong></td>
+            <td>${exam.year}</td>
+            <td>Section ${exam.section}</td>
+            <td>${exam.date}</td>
+            <td>${exam.time}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    // Render Student Views (Filtered)
+    function renderStudentDashboard() {
+      const tbody = document.getElementById('student-exam-list');
+      const emptyMsg = document.getElementById('student-empty-msg');
+      const classInfo = document.getElementById('student-class-info');
+
+      classInfo.textContent = `Showing exams for: ${currentUser.year} - Section ${currentUser.section}`;
+      tbody.innerHTML = '';
+
+      // Filter exams matching Year and Section
+      const filteredExams = exams.filter(
+        exam => exam.year === currentUser.year && exam.section === currentUser.section
+      );
+
+      if (filteredExams.length === 0) {
+        emptyMsg.classList.remove('hidden');
+      } else {
+        emptyMsg.classList.add('hidden');
+        filteredExams.forEach(exam => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><strong>${exam.subject}</strong></td>
+            <td>${exam.date}</td>
+            <td>${exam.time}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    // Main Render Function based on Session
+    function renderApp() {
+      const authSection = document.getElementById('auth-section');
+      const adminDashboard = document.getElementById('admin-dashboard');
+      const studentDashboard = document.getElementById('student-dashboard');
+      const userInfo = document.getElementById('user-info');
+      const welcomeText = document.getElementById('welcome-text');
+
+      if (!currentUser) {
+        authSection.classList.remove('hidden');
+        adminDashboard.classList.add('hidden');
+        studentDashboard.classList.add('hidden');
+        userInfo.classList.add('hidden');
+      } else {
+        authSection.classList.add('hidden');
+        userInfo.classList.remove('hidden');
+        welcomeText.textContent = `Welcome, ${currentUser.name} (${currentUser.role.toUpperCase()})`;
+
+        if (currentUser.role === 'admin') {
+          adminDashboard.classList.remove('hidden');
+          studentDashboard.classList.add('hidden');
+          renderAdminDashboard();
+        } else {
+          studentDashboard.classList.remove('hidden');
+          adminDashboard.classList.add('hidden');
+          renderStudentDashboard();
+        }
+      }
+    }
+
+    // Initialize Application
+    renderApp();
+  </script>
+</body>
+</html>
